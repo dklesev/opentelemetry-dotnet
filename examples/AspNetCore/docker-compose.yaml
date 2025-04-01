@@ -3,7 +3,7 @@ services:
 
   # OTEL Collector to receive logs, metrics and traces from the application
   otel-collector:
-    image: otel/opentelemetry-collector:0.111.0
+    image: otel/opentelemetry-collector:0.122.1
     command: [ "--config=/etc/otel-collector.yaml" ]
     volumes:
       - ./otel-collector.yaml:/etc/otel-collector.yaml
@@ -21,7 +21,7 @@ services:
       - ./tempo-data:/tmp/tempo
     ports:
       - "3200"  # tempo
-      - "4317"  # otlp grpc
+      - 5317:4317  # otlp grpc
       - "4318"  # otlp http
 
 # Exports Metrics to Prometheus

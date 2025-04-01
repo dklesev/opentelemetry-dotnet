@@ -9,6 +9,7 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Serilog;
 
 var appBuilder = WebApplication.CreateBuilder(args);
 
@@ -71,6 +72,9 @@ appBuilder.Services.AddOpenTelemetry()
                     // Use IConfiguration directly for Otlp exporter endpoint option.
                     otlpOptions.Endpoint = new Uri(appBuilder.Configuration.GetValue("Otlp:Endpoint", defaultValue: "http://localhost:4317"));
                 });
+                break;
+
+            case "NONE":
                 break;
 
             default:
@@ -137,10 +141,17 @@ appBuilder.Services.AddOpenTelemetry()
                 });
                 break;
             default:
-                builder.AddConsoleExporter();
+                //builder.AddConsoleExporter();
                 break;
         }
     });
+
+if (logExporter == "JSON")
+{
+    appBuilder.Host.UseSerilog((context, config) =>
+        config.ReadFrom
+            .Configuration(context.Configuration));
+}
 
 appBuilder.Services.AddControllers();
 
@@ -162,10 +173,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Configure OpenTelemetry Prometheus AspNetCore middleware scrape endpoint if enabled.
-if (metricsExporter.Equals("prometheus", StringComparison.OrdinalIgnoreCase))
-{
-    app.UseOpenTelemetryPrometheusScrapingEndpoint();
-}
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 app.Run();
