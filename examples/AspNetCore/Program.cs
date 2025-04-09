@@ -3,6 +3,8 @@
 
 using System.Diagnostics.Metrics;
 using Examples.AspNetCore;
+using Examples.AspNetCore.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Logs;
@@ -146,6 +148,10 @@ appBuilder.Services.AddOpenTelemetry()
         }
     });
 
+appBuilder.Services.AddSingleton<SharedObject>();
+appBuilder.Services.AddSingleton<IHealthCheck, SampleHealthCheck>();
+appBuilder.Services.AddHealthChecks().AddCheck<SampleHealthCheck>("example");
+
 if (logExporter == "JSON")
 {
     appBuilder.Host.UseSerilog((context, config) =>
@@ -172,6 +178,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/healthz");
 
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
