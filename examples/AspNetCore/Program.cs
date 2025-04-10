@@ -147,7 +147,7 @@ appBuilder.Services.AddOpenTelemetry()
                 break;
         }
     });
-
+// For full documentation on HealthChecks, how to implement different endpoints for readiness- and livenessprobes as well as database probes, see: https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-9.0
 appBuilder.Services.AddSingleton<SharedObject>();
 appBuilder.Services.AddSingleton<IHealthCheck, SampleHealthCheck>();
 appBuilder.Services.AddHealthChecks().AddCheck<SampleHealthCheck>("example");

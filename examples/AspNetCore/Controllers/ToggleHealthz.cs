@@ -21,8 +21,8 @@ public class ToggleHealthz : ControllerBase
         this._healthCheck = check;
     }
 
-    [HttpPost]
-    public bool Post()
+    [HttpGet]
+    public bool ToggleHealthzState()
     {
         this._healthCheck.IsHealthy = !this._healthCheck.IsHealthy;
         return true;
