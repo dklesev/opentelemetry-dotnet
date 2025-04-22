@@ -157,6 +157,8 @@ appBuilder.Services.AddOpenTelemetry()
 appBuilder.Services.AddSingleton<SharedObject>();
 appBuilder.Services.AddSingleton<IHealthCheck, SampleHealthCheck>();
 appBuilder.Services.AddHealthChecks().AddCheck<SampleHealthCheck>("example");
+appBuilder.Services.AddHealthChecks().AddDbContextCheck<TodosContext>();
+
 
 if (logExporter == "JSON")
 {
