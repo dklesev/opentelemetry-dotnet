@@ -1,10 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Security.Cryptography;
-using Examples.AspNetCore;
 using Examples.AspNetCore.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,17 +10,17 @@ namespace Examples.AspNetCore.Controllers;
 [Route("[controller]")]
 public class ToggleHealthz : ControllerBase
 {
-    private SharedObject _healthCheck;
+    private readonly SharedObject healthCheck;
 
     public ToggleHealthz(SharedObject check)
     {
-        this._healthCheck = check;
+        this.healthCheck = check;
     }
 
     [HttpGet]
     public bool ToggleHealthzState()
     {
-        this._healthCheck.IsHealthy = !this._healthCheck.IsHealthy;
+        this.healthCheck.IsHealthy = !this.healthCheck.IsHealthy;
         return true;
     }
 }

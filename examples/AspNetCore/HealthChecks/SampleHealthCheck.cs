@@ -7,18 +7,18 @@ namespace Examples.AspNetCore.HealthChecks;
 
 public class SampleHealthCheck : IHealthCheck
 {
-    private SharedObject _sharedObject;
+    private readonly SharedObject sharedObject;
 
     public SampleHealthCheck(SharedObject sharedObject)
     {
-        this._sharedObject = sharedObject;
+        this.sharedObject = sharedObject;
     }
 
     public Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-
-        if (this._sharedObject.IsHealthy)
+        ArgumentNullException.ThrowIfNull(context);
+        if (this.sharedObject.IsHealthy)
         {
             return Task.FromResult(
                 HealthCheckResult.Healthy("A healthy result."));

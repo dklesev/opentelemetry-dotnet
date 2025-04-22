@@ -4,6 +4,10 @@
 using System.Diagnostics.Metrics;
 using Examples.AspNetCore;
 using Examples.AspNetCore.HealthChecks;
+using Examples.AspNetCore.Persistence.Context;
+using Examples.AspNetCore.Persistence.Extensions;
+using Examples.AspNetCore.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
@@ -24,7 +28,7 @@ var metricsExporter = appBuilder.Configuration.GetValue("UseMetricsExporter", de
 // Note: Switch between Console/OTLP by setting UseLogExporter in appsettings.json.
 var logExporter = appBuilder.Configuration.GetValue("UseLogExporter", defaultValue: "CONSOLE").ToUpperInvariant();
 
-// Note: Switch between Explicit/Exponential by setting HistogramAggregation in appsettings.json
+// Note: Switch between Explicit/Exponential by setting HistogramAggregation in appsettings.json.
 var histogramAggregation = appBuilder.Configuration.GetValue("HistogramAggregation", defaultValue: "EXPLICIT").ToUpperInvariant();
 
 // Create a service to expose ActivitySource, and Metric Instruments
@@ -143,11 +147,13 @@ appBuilder.Services.AddOpenTelemetry()
                 });
                 break;
             default:
-                //builder.AddConsoleExporter();
+                // builder.AddConsoleExporter();
                 break;
         }
     });
+
 // For full documentation on HealthChecks, how to implement different endpoints for readiness- and livenessprobes as well as database probes, see: https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-9.0
+
 appBuilder.Services.AddSingleton<SharedObject>();
 appBuilder.Services.AddSingleton<IHealthCheck, SampleHealthCheck>();
 appBuilder.Services.AddHealthChecks().AddCheck<SampleHealthCheck>("example");
@@ -165,7 +171,26 @@ appBuilder.Services.AddEndpointsApiExplorer();
 
 appBuilder.Services.AddSwaggerGen();
 
+// Register Persistence Services
+var postgresConfig = appBuilder.Configuration.GetSection(PostgresConfiguration.Section).Get<PostgresConfiguration>()
+    ?? throw new InvalidOperationException($"Configuration section '{PostgresConfiguration.Section}' not found.");
+appBuilder.Services.RegisterTodosContext(postgresConfig);
+appBuilder.Services.RegisterTodoRepository();
+
+// Register Application Services
+appBuilder.Services.AddScoped<ITodoService, TodoService>();
+
 var app = appBuilder.Build();
+
+// Bind API key from configuration
+var configuredApiKey = app.Configuration.GetValue<string>("ApiKey");
+
+// Apply migrations
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<TodosContext>();
+    await dbContext.Database.MigrateAsync().ConfigureAwait(false);
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -179,8 +204,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHealthChecks("/healthz");
+// see: https://learn.microsoft.com/en-us/aspnet/core/log-mon/metrics/metrics?view=aspnetcore-9.0#opt-out-of-http-metrics-on-certain-endpoints-and-requests
+app.MapHealthChecks("/healthz").DisableHttpMetrics();
 
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
-app.Run();
+await app.RunAsync().ConfigureAwait(false);

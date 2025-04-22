@@ -1,3 +1,5 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
 
 using Examples.AspNetCore.Models;
 
@@ -7,7 +9,7 @@ public class TodoItemEntity
 {
     public int Id { get; set; }
 
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     public DateTime? DueDate { get; set; }
 
@@ -16,16 +18,17 @@ public class TodoItemEntity
     public TodoItem ToDomainModel() =>
         new()
         {
-            Id = Id,
-            Title = Title,
-            DueDate = DueDate,
-            IsCompleted = IsCompleted
+            Id = this.Id,
+            Title = this.Title,
+            DueDate = this.DueDate,
+            IsCompleted = this.IsCompleted,
         };
 
     public void SetFieldsFrom(TodoItem domainModel)
     {
-        Title = domainModel.Title;
-        DueDate = domainModel.DueDate;
-        IsCompleted = domainModel.IsCompleted;
+        ArgumentNullException.ThrowIfNull(domainModel);
+        this.Title = domainModel.Title;
+        this.DueDate = domainModel.DueDate;
+        this.IsCompleted = domainModel.IsCompleted;
     }
 }

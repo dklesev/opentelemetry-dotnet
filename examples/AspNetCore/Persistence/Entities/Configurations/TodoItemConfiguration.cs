@@ -1,3 +1,6 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -7,11 +10,9 @@ public class TodoItemConfiguration : IEntityTypeConfiguration<TodoItemEntity>
 {
     public void Configure(EntityTypeBuilder<TodoItemEntity> builder)
     {
-
-        // Die, in diesem Beispiel gezeigte, manuelle Konfiguration der Entität ist optional.
+        ArgumentNullException.ThrowIfNull(builder);
 
         builder.ToTable("TodoItems");
-
         builder.Property(p => p.Id).ValueGeneratedOnAdd();
         builder.Property(p => p.Title).IsRequired();
         builder.Property(p => p.DueDate).IsRequired(false);

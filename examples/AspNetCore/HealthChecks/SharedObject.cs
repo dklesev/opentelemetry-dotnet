@@ -5,9 +5,14 @@ namespace Examples.AspNetCore.HealthChecks;
 
 public class SharedObject
 {
+    public SharedObject()
+    {
+        this.IsHealthy = true;
+    }
+
     public bool IsHealthy
     {
         get;
         set;
-    } = true;
+    }
 }

@@ -4,6 +4,8 @@
     <TargetFramework>$(DefaultTargetFrameworkForExampleApps)</TargetFramework>
     <AnalysisLevel>latest-all</AnalysisLevel>
     <NoWarn>$(NoWarn);CA1515</NoWarn>
+    <!-- Disable strongname warning as that's not been enforced since .net 5.-->
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +29,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="FluentResults" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
